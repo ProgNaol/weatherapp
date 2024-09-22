@@ -52,3 +52,31 @@ h2 {
     color: #333;
     font-size: 24px;
 }
+
+.addinfo {
+    background-color: #f7f9fc; /* Light gray background for contrast */
+    border-left: 5px solid #007BFF; /* Blue left border for modern accent */
+    padding: 15px; /* Space inside the addinfo element */
+    border-radius: 5px; /* Slightly rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+}
+
+.addinfo:hover {
+    transform: translateY(-2px); /* Slight lift effect on hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
+}
+
+.addinfo h2 {
+    font-size: 1.5rem; /* Modern font size for headings */
+    color: #333; /* Dark gray text */
+    margin-bottom: 10px; /* Space below the heading */
+}
+
+.addinfo p {
+    font-size: 1rem; /* Standard text size */
+    color: #555; /* Medium gray text for readability */
+}
+.indecator {
+    font-size: 80px;
+}

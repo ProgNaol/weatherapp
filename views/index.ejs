@@ -18,15 +18,17 @@
         <% if (typeof willRain !== 'undefined') { %>
             <div class="result">
                 <% if (willRain) { %>
-                    <h2>Yes, it will rain tomorrow in <%= city %> 🌧️</h2>
+                    <h1 class="indecator">🌧️</h1>
+                    <h2>Yes, it will rain tomorrow in <%= city %></h2>
                 <% } else { %>
-                    <h2>No, it won't rain tomorrow in <%= city %> ☀️</h2>
+                    <h1 class="indecator">☀️</h1>
+                    <h2>No, it won't rain tomorrow in <%= city %></h2>
                 <% } %>
-                <p>Temperature: <%= temperature %>°C</p>
-                <p>Cloudiness: <%= clouds %>%</p>
-                <p>Latitude: <%= lat %></p>
-                <p>Longitude: <%= lon %></p>
-                <p>humidity: <%= humidity %></p>
+                <p class="addinfo">Temperature: <%= temperature %>°C</p>
+                <p class="addinfo">Cloudiness: <%= clouds %>%</p>
+                <p class="addinfo">Latitude: <%= lat %></p>
+                <p class="addinfo">Longitude: <%= lon %></p>
+                <p class="addinfo">humidity: <%= humidity %></p>
 
             </div>
         <% } %>
