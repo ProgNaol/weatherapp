@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: weatherer
+    env: node
+    buildCommand: 'npm install'
+    startCommand: 'node app.js'
+    plan: free
