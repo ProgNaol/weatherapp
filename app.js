@@ -2,10 +2,9 @@ import express from 'express';
 import axios from 'axios';
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
-
 app.use(express.static('public')); 
 app.use(express.urlencoded({ extended: true }));
 
@@ -25,20 +24,17 @@ app.post('/', async (req, res) => {
 
         const tomorrowForecast = forecastResponse.data.list[1];
 
-            const willRain = tomorrowForecast.weather.some(w => w.main.toLowerCase() === 'rain');
-            const temperature = tomorrowForecast.main.temp;
-            const clouds = tomorrowForecast.clouds.all;
-            const humidity = tomorrowForecast.main.humidity
+        const willRain = tomorrowForecast.weather.some(w => w.main.toLowerCase() === 'rain');
+        const temperature = tomorrowForecast.main.temp;
+        const clouds = tomorrowForecast.clouds.all;
+        const humidity = tomorrowForecast.main.humidity;
 
-            res.render('index', { city, willRain, temperature, clouds, lat, lon, humidity });
-
+        res.render('index', { city, willRain, temperature, clouds, lat, lon, humidity });
     } catch (error) {
         res.render('error', { message: error.message });
     }
 });
 
-
-
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 });
