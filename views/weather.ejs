@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather for <%= city %></title>
+</head>
+<body>
+    <h1>Weather Information for <%= city %></h1>
+    <% if (willRain) { %>
+        <h2>Yes, it will rain tomorrow! 🌧️</h2>
+    <% } else { %>
+        <h2>No, it won't rain tomorrow! ☀️</h2>
+    <% } %>
+    <a href="/">Check another city</a>
+</body>
+</html>

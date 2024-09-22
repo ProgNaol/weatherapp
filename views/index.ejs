@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will It Rain Tomorrow?</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Check if it will rain tomorrow</h1>
+
+        <form action="/" method="POST">
+            <input type="text" name="city" placeholder="Enter your city" required>
+            <button type="submit">Check Weather</button>
+        </form>
+
+        <% if (typeof willRain !== 'undefined') { %>
+            <div class="result">
+                <% if (willRain) { %>
+                    <h2>Yes, it will rain tomorrow in <%= city %> 🌧️</h2>
+                <% } else { %>
+                    <h2>No, it won't rain tomorrow in <%= city %> ☀️</h2>
+                <% } %>
+                <p>Temperature: <%= temperature %>°C</p>
+                <p>Cloudiness: <%= clouds %>%</p>
+                <p>Latitude: <%= lat %></p>
+                <p>Longitude: <%= lon %></p>
+                <p>humidity: <%= humidity %></p>
+
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>
