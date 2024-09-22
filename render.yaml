@@ -2,6 +2,7 @@ services:
   - type: web
     name: weatherer
     env: node
-    buildCommand: 'npm install'
-    startCommand: 'node app.js'
+    buildCommand: npm install
+    startCommand: npm start
     plan: free
+    autoDeploy: true
