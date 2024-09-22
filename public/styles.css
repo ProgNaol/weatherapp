@@ -87,4 +87,8 @@ h2 {
     margin-top: 20px; /* Space above the copyright */
     font-size: 0.9rem; /* Slightly smaller font size */
     color: #777; /* Lighter gray for the copyright text */
+    padding-top: 15px; /* Space above the copyright text */
+    border-top: 1px solid #eaeaea; /* Light top border for separation */
+    margin-bottom: 0; /* Remove bottom margin */
 }
+
