@@ -81,3 +81,10 @@ h2 {
 .indecator {
     font-size: 60px;
 }
+
+.copyright {
+    text-align: center; /* Center the copyright text */
+    margin-top: 20px; /* Space above the copyright */
+    font-size: 0.9rem; /* Slightly smaller font size */
+    color: #777; /* Lighter gray for the copyright text */
+}
