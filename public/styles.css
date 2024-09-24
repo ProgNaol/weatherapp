@@ -71,6 +71,7 @@ form button:hover {
     background-color: #355c7d;
 }
 
+/* Weather Result Styling */
 .result {
     margin-top: 40px;
     text-align: center;
@@ -81,18 +82,44 @@ form button:hover {
     animation: bounce 1.5s infinite;
 }
 
+/* Yes/No rain styles */
 h2 {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 600;
     margin: 20px 0;
+    background: -webkit-linear-gradient(135deg, #56CCF2, #2F80ED);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0px 4px 5px rgba(0, 0, 0, 0.3);
+    animation: textPop 0.8s ease;
 }
 
+/* Additional Info Styling */
 .addinfo {
     font-size: 18px;
-    color: #bbb;
-    margin: 5px 0;
+    color: #ddd;
+    background-color: #333;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
+.addinfo span {
+    font-weight: 600;
+    color: #eee;
+}
+
+.addinfo i {
+    font-size: 22px;
+    color: #56CCF2;
+    margin-right: 10px;
+}
+
+/* Footer styling */
 footer.copyright {
     margin-top: 30px;
     font-size: 14px;
@@ -139,5 +166,16 @@ footer.copyright {
     }
     50% {
         transform: translateY(-10px);
+    }
+}
+
+@keyframes textPop {
+    from {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
     }
 }
