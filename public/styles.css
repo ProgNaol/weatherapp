@@ -1,94 +1,104 @@
-/* Step 1: Basic reset and styling for the body */
-body {
+/* styles.css */
+* {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f0f8ff;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #007BFF, #6A82FB);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 
-/* Step 2: Container styling */
 .container {
-    text-align: center;
     background-color: white;
     padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
 }
 
-/* Step 3: Form styling */
-input[type="text"] {
+h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+form input[type="text"] {
     padding: 10px;
-    width: 250px;
-    border: 2px solid #ccc;
+    width: 80%;
+    border: 2px solid #007BFF;
     border-radius: 5px;
-    margin-right: 10px;
+    margin-bottom: 20px;
     font-size: 16px;
 }
 
-button {
-    padding: 10px 15px;
-    font-size: 16px;
-    background-color: #008cba;
+form button {
+    padding: 12px 20px;
+    background-color: #007BFF;
     color: white;
     border: none;
     border-radius: 5px;
+    font-size: 16px;
     cursor: pointer;
-    margin-top: 24px;
+    transition: background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #005f7a;
+form button:hover {
+    background-color: #0056b3;
 }
 
-/* Step 4: Result styling */
 .result {
-    margin-top: 20px;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.indecator {
+    font-size: 64px;
+    margin-bottom: 20px;
 }
 
 h2 {
+    font-size: 22px;
     color: #333;
-    font-size: 24px;
 }
 
 .addinfo {
-    background-color: #f7f9fc; /* Light gray background for contrast */
-    border-left: 5px solid #007BFF; /* Blue left border for modern accent */
-    padding: 15px; /* Space inside the addinfo element */
-    border-radius: 5px; /* Slightly rounded corners */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+    font-size: 16px;
+    color: #666;
+    margin: 10px 0;
 }
 
-.addinfo:hover {
-    transform: translateY(-2px); /* Slight lift effect on hover */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Deeper shadow on hover */
+footer.copyright {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #aaa;
 }
 
-.addinfo h2 {
-    font-size: 1.5rem; /* Modern font size for headings */
-    color: #333; /* Dark gray text */
-    margin-bottom: 10px; /* Space below the heading */
-}
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
 
-.addinfo p {
-    font-size: 1rem; /* Standard text size */
-    color: #555; /* Medium gray text for readability */
-}
-.indecator {
-    font-size: 40px;
-}
+    h1 {
+        font-size: 24px;
+    }
 
-.copyright {
-    text-align: center; /* Center the copyright text */
-    margin-top: 20px; /* Space above the copyright */
-    font-size: 0.9rem; /* Slightly smaller font size */
-    color: #777; /* Lighter gray for the copyright text */
-    padding-top: 15px; /* Space above the copyright text */
-    border-top: 1px solid #eaeaea; /* Light top border for separation */
-    margin-bottom: 0; /* Remove bottom margin */
-}
+    form input[type="text"] {
+        width: 100%;
+    }
 
+    h2 {
+        font-size: 20px;
+    }
+
+    .addinfo {
+        font-size: 14px;
+    }
+}
