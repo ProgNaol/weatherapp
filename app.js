@@ -22,7 +22,7 @@ app.post('/', async (req, res) => {
 
         const forecastResponse = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
 
-        const tomorrowForecast = forecastResponse.data.list[2];
+        const tomorrowForecast = forecastResponse.data.list[1];
 
         const willRain = tomorrowForecast.weather.some(w => w.main.toLowerCase() === 'rain');
         const temperature = tomorrowForecast.main.temp;
