@@ -22,7 +22,7 @@ app.post('/', async (req, res) => {
     try {
         const geoResponse = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`);
         const { lat, lon } = geoResponse.data.coord;
-
+        
         const forecastResponse = await axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
 
         let forecastIndex;
@@ -62,6 +62,11 @@ app.post('/', async (req, res) => {
         console.error(error); // Log error for debugging
         res.render('error', { message: error.message });
     }
+});
+
+// Add this new route at the end, after all other routes
+app.use((req, res, next) => {
+    res.status(404).render('404');
 });
 
 app.listen(port, () => {
