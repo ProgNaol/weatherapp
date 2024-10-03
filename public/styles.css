@@ -179,3 +179,27 @@ footer.copyright {
         opacity: 1;
     }
 }
+
+form select {
+    padding: 15px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 18px;
+    background-color: #333;
+    color: #fff;
+    outline: none;
+    transition: background-color 0.3s ease;
+}
+
+/* Styling for the dropdown options */
+form select option {
+    background-color: #222; /* Background color of the dropdown */
+    color: #fff; /* Text color for the options */
+}
+
+/* Change background color when dropdown is focused */
+form select:focus {
+    background-color: #444;
+}

@@ -3,26 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Will It Rain Tomorrow?</title>
+    <title>Will It Rain?</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Check if it will rain tomorrow</h1>
+        <h1>Check if it will rain</h1>
 
         <form action="/" method="POST">
             <input type="text" name="city" placeholder="Enter your city" required>
+            <select name="choose" required>
+                <option value="Today">Today</option>
+                <option value="Tomorrow">Tomorrow</option>
+                <option value="Day After Tomorrow">Day After Tomorrow</option>
+                <option value="In 3 Days">In 3 Days</option>
+                <option value="In 4 Days">In 4 Days</option>
+            </select>
             <button type="submit">Check Weather</button>
         </form>
 
         <% if (typeof willRain !== 'undefined') { %>
             <div class="result">
                 <% if (willRain) { %>
-                    <h1 class="indecator">🌧️</h1>
-                    <h2>Yes, it will rain tomorrow in <%= city %></h2>
+                    <h1 class="indicator">🌧️</h1>
+                    <h2>Yes, it will rain on <%= choose %> in <%= city %></h2>
                 <% } else { %>
-                    <h1 class="indecator">☀️</h1>
-                    <h2>No, it won't rain tomorrow in <%= city %></h2>
+                    <h1 class="indicator">☀️</h1>
+                    <h2>No, it won't rain on <%= choose %> in <%= city %></h2>
                 <% } %>
                 <p class="addinfo">Temperature: <%= temperature %>°C</p>
                 <p class="addinfo">Cloudiness: <%= clouds %>%</p>
