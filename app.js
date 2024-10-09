@@ -1,85 +1,54 @@
 import express from 'express';
 import axios from 'axios';
 import bodyParser from "body-parser";
-import mongoose from "mongoose";
+import mongoose from "mongoose"; // Import mongoose
 import bcrypt from "bcrypt";
 import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as LocalStrategy } from "passport-local"; // Use named import
+import GoogleStrategy from "passport-google-oauth2";
 import session from "express-session";
+import MongoStore from "connect-mongo"; // Import connect-mongo
 import env from "dotenv";
 
-// Load environment variables
-env.config();
-
-// Initialize the app
 const app = express();
 const port = process.env.PORT || 3000;
 const saltRounds = 10;
+env.config();
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, {
+const mongoURI = process.env.MONGODB_URI;
+
+mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => {
-  console.log("MongoDB connected");
-}).catch(err => {
+})
+.then(() => {
+  console.log("MongoDB connected successfully!");
+})
+.catch(err => {
   console.error("MongoDB connection error:", err);
 });
 
-// User schema
-const userSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-});
-
-const User = mongoose.model("User", userSchema);
-
-// Middleware for sessions
+// Session setup with MongoDB store
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: mongoURI }), // Store sessions in MongoDB
   })
 );
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Passport local strategy for authentication
-passport.use(new LocalStrategy(
-  async (username, password, done) => {
-    try {
-      const user = await User.findOne({ email: username });
-      if (!user) {
-        return done(null, false, { message: "User not found." });
-      }
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return done(null, false, { message: "Invalid password." });
-      }
-      return done(null, user);
-    } catch (err) {
-      return done(err);
-    }
-  }
-));
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (err) {
-    done(err);
-  }
-});
-
-// Middleware to check if user is authenticated
+// Middleware to check if the user is authenticated
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
@@ -87,21 +56,24 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/login');
 }
 
-// Routes
+// Render home page (accessible to all)
 app.get("/", (req, res) => {
   res.render("home.ejs");
 });
 
+// Render login page
 app.get("/login", (req, res) => {
   res.render("login.ejs");
 });
 
+// Render register page
 app.get("/register", (req, res) => {
   res.render("register.ejs");
 });
 
+// Logout route
 app.get("/logout", (req, res) => {
-  req.logout(err => {
+  req.logout(function (err) {
     if (err) {
       return next(err);
     }
@@ -109,50 +81,15 @@ app.get("/logout", (req, res) => {
   });
 });
 
+// Weather app page (protected)
 app.get('/index', ensureAuthenticated, (req, res) => {
   res.render('index');
 });
 
-// Registration route
-app.post("/register", async (req, res) => {
-  const email = req.body.username;
-  const password = req.body.password;
-
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.redirect("/login");
-    }
-
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const newUser = new User({ email, password: hashedPassword });
-    await newUser.save();
-
-    req.login(newUser, (err) => {
-      if (err) {
-        console.error("Login error after registration:", err);
-        return res.status(500).send("Internal Server Error");
-      }
-      res.redirect("/index");
-    });
-  } catch (err) {
-    console.error("Registration error:", err);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-// Local login route
-app.post("/login", passport.authenticate("local", {
-  failureRedirect: "/login",
-  failureFlash: true,
-}), (req, res) => {
-  res.redirect("/index");
-});
-
-// Weather app form submission
+// Weather app form submission (protected)
 app.post('/index', ensureAuthenticated, async (req, res) => {
   const city = req.body.city;
-  const apiKey = 'a95632f8fc85944acedfc23eb09ef234'; // Make sure to keep this private
+  const apiKey = 'a95632f8fc85944acedfc23eb09ef234';
   const chosenDay = req.body.choose;
 
   console.log(`City: ${city}, Day: ${chosenDay}`);
@@ -186,6 +123,7 @@ app.post('/index', ensureAuthenticated, async (req, res) => {
     }
 
     const selectedForecast = forecastResponse.data.list[forecastIndex];
+
     const willRain = selectedForecast.weather.some(w => w.main.toLowerCase() === 'rain');
     const temperature = selectedForecast.main.temp;
     const clouds = selectedForecast.clouds.all;
@@ -195,12 +133,94 @@ app.post('/index', ensureAuthenticated, async (req, res) => {
 
     res.render('index', { city, willRain, temperature, clouds, lat, lon, humidity, choose: chosenDay });
   } catch (error) {
-    console.error("Weather API error:", error);
-    res.render('error', { message: "Could not fetch weather data." });
+    console.error(error);
+    res.render('error', { message: error.message });
   }
 });
 
-// Start the server
+// Google authentication route
+app.get(
+  "/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+);
+
+app.get(
+  "/auth/google/secrets",
+  passport.authenticate("google", {
+    successRedirect: "/index",
+    failureRedirect: "/login",
+  })
+);
+
+// Local login route
+app.post(
+  "/login",
+  passport.authenticate("local", {
+    successRedirect: "/index",
+    failureRedirect: "/login",
+  })
+);
+
+// Register route
+app.post("/register", async (req, res) => {
+  const email = req.body.username;
+  const password = req.body.password;
+
+  try {
+    const checkResult = await db.collection("users").findOne({ email });
+
+    if (checkResult) {
+      res.redirect("/login");
+    } else {
+      bcrypt.hash(password, saltRounds, async (err, hash) => {
+        if (err) {
+          console.error("Error hashing password:", err);
+        } else {
+          await db.collection("users").insertOne({
+            email: email,
+            password: hash,
+          });
+          res.redirect("/login");
+        }
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+passport.use(
+  new LocalStrategy(async function (username, password, cb) {
+    try {
+      const user = await db.collection("users").findOne({ email: username });
+      if (user) {
+        const valid = await bcrypt.compare(password, user.password);
+        if (valid) {
+          return cb(null, user);
+        } else {
+          return cb(null, false, { message: "Incorrect password" });
+        }
+      } else {
+        return cb(null, false, { message: "User not found" });
+      }
+    } catch (err) {
+      console.log(err);
+      return cb(err);
+    }
+  })
+);
+
+passport.serializeUser((user, cb) => {
+  cb(null, user);
+});
+
+passport.deserializeUser((user, cb) => {
+  cb(null, user);
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
