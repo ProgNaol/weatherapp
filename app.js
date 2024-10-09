@@ -1,19 +1,20 @@
 import express from 'express';
 import axios from 'axios';
 import bodyParser from "body-parser";
-import mongoose from "mongoose"; // Import mongoose
+import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local"; // Use named import
-import GoogleStrategy from "passport-google-oauth2";
+import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
-import MongoStore from 'connect-mongo';  // Import connect-mongo
-import env from "dotenv";
+import MongoStore from 'connect-mongo';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 const saltRounds = 10;
-env.config();
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
@@ -30,12 +31,21 @@ mongoose.connect(mongoURI, {
     console.error('MongoDB connection error:', err);
 });
 
+// Define User Schema
+const UserSchema = new mongoose.Schema({
+    email: String,
+    password: String,
+    googleId: String
+});
+
+const User = mongoose.model('User', UserSchema);
+
 // Set up session store
 app.use(session({
-    secret: process.env.SESSION_SECRET, // Replace with a secure key
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: mongoURI }) // Use the mongoURI variable here
+    store: MongoStore.create({ mongoUrl: mongoURI })
 }));
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -88,7 +98,7 @@ app.get('/index', ensureAuthenticated, (req, res) => {
 // Weather app form submission (protected)
 app.post('/index', ensureAuthenticated, async (req, res) => {
   const city = req.body.city;
-  const apiKey = 'a95632f8fc85944acedfc23eb09ef234';
+  const apiKey = process.env.OPENWEATHER_API_KEY;
   const chosenDay = req.body.choose;
 
   console.log(`City: ${city}, Day: ${chosenDay}`);
@@ -154,70 +164,92 @@ app.get(
 );
 
 // Local login route
-app.post(
-  "/login",
-  passport.authenticate("local", {
-    successRedirect: "/index",
-    failureRedirect: "/login",
-  })
-);
+app.post("/login", passport.authenticate("local", {
+  successRedirect: "/index",
+  failureRedirect: "/login",
+}));
 
 // Register route
 app.post("/register", async (req, res) => {
-  const email = req.body.username;
-  const password = req.body.password;
+  const { username, password } = req.body;
 
   try {
-    const checkResult = await db.collection("users").findOne({ email });
+    const existingUser = await User.findOne({ email: username });
 
-    if (checkResult) {
-      res.redirect("/login");
-    } else {
-      bcrypt.hash(password, saltRounds, async (err, hash) => {
-        if (err) {
-          console.error("Error hashing password:", err);
-        } else {
-          await db.collection("users").insertOne({
-            email: email,
-            password: hash,
-          });
-          res.redirect("/login");
-        }
-      });
+    if (existingUser) {
+      return res.redirect("/login");
     }
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const newUser = new User({
+      email: username,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+    res.redirect("/login");
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).send("Internal Server Error");
   }
 });
 
-passport.use(
-  new LocalStrategy(async function (username, password, cb) {
+// Local login strategy
+passport.use(new LocalStrategy(
+  { usernameField: 'username' },
+  async function (username, password, done) {
     try {
-      const user = await db.collection("users").findOne({ email: username });
-      if (user) {
-        const valid = await bcrypt.compare(password, user.password);
-        if (valid) {
-          return cb(null, user);
-        } else {
-          return cb(null, false, { message: "Incorrect password" });
-        }
-      } else {
-        return cb(null, false, { message: "User not found" });
+      const user = await User.findOne({ email: username });
+      if (!user) {
+        return done(null, false, { message: 'Incorrect username.' });
       }
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+      return done(null, user);
     } catch (err) {
-      console.log(err);
-      return cb(err);
+      return done(err);
     }
-  })
-);
+  }
+));
 
-passport.serializeUser((user, cb) => {
-  cb(null, user);
+// Google Strategy
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/google/secrets",
+    userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
+  },
+  async function(accessToken, refreshToken, profile, done) {
+    try {
+      const existingUser = await User.findOne({ googleId: profile.id });
+      if (existingUser) {
+        return done(null, existingUser);
+      }
+      const newUser = new User({
+        googleId: profile.id,
+        email: profile.emails[0].value
+      });
+      await newUser.save();
+      done(null, newUser);
+    } catch (err) {
+      done(err, null);
+    }
+  }
+));
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
 });
 
-passport.deserializeUser((user, cb) => {
-  cb(null, user);
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
 
 app.listen(port, () => {
