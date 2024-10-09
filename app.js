@@ -18,14 +18,16 @@ env.config();
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
 
-mongoose.connect(mongoURI)
-  .then(() => {
-    console.log("MongoDB connected successfully!");
-  })
-  .catch(err => {
-    console.error("MongoDB connection error:", err);
-  });
-
+mongoose.connect(mongoURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => {
+  console.log("MongoDB connected successfully!");
+})
+.catch(err => {
+  console.error("MongoDB connection error:", err);
+});
 
 // Session setup with MongoDB store
 app.use(
