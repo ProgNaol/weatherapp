@@ -7,7 +7,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local"; // Use named import
 import GoogleStrategy from "passport-google-oauth2";
 import session from "express-session";
-import MongoStore from "connect-mongo"; // Import connect-mongo
+import MongoStore from 'connect-mongo';  // Import connect-mongo
 import env from "dotenv";
 
 const app = express();
@@ -16,27 +16,27 @@ const saltRounds = 10;
 env.config();
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, { 
-  useNewUrlParser: true, 
-  useUnifiedTopology: true 
+const mongoURI = process.env.MONGODB_URI;
+
+// Connect to MongoDB
+mongoose.connect(mongoURI, { 
+    useNewUrlParser: true, 
+    useUnifiedTopology: true 
 })
 .then(() => {
-  console.log('MongoDB connected successfully!');
+    console.log('MongoDB connected successfully!');
 })
 .catch(err => {
-  console.error('MongoDB connection error:', err);
+    console.error('MongoDB connection error:', err);
 });
 
-
-// Session setup with MongoDB store
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
+// Set up session store
+app.use(session({
+    secret: process.env.SESSION_SECRET, // Replace with a secure key
     resave: false,
-    saveUninitialized: true,
-    store: MongoStore.create({ mongoUrl: mongoURI }), // Store sessions in MongoDB
-  })
-);
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: mongoURI }) // Use the mongoURI variable here
+}));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
