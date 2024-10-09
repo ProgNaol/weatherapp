@@ -9,12 +9,17 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
 import MongoStore from 'connect-mongo';
 import dotenv from "dotenv";
+import EmailVerifier from 'email-verifier';
+
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 const saltRounds = 10;
+
+
+const verifier = new EmailVerifier('dbf848ee-5254-48f0-ae8a-727f2f38d7cc');
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
@@ -218,7 +223,7 @@ passport.use(new LocalStrategy(
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/secrets",
+    callbackURL: "https://weatherapp-sjep.onrender.com/auth/google/secrets",
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
   },
   async function(accessToken, refreshToken, profile, done) {
