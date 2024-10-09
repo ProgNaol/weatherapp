@@ -214,3 +214,54 @@
     font-size: 0.8rem;
     opacity: 0.7;
   }
+
+  .container {
+    text-align: center;
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+.user-profile {
+    position: relative;
+    display: inline-block;
+    margin-top: 20px;
+}
+
+.profile-pic {
+    width: 50px; /* Adjust size as needed */
+    height: 50px; /* Adjust size as needed */
+    border-radius: 50%;
+}
+
+.user-info {
+    display: inline-block;
+    margin-left: 10px;
+    position: relative;
+}
+
+.username {
+    font-size: 16px;
+    color: #e1e1e6;
+    cursor: pointer;
+}
+
+.email-tooltip {
+    display: none; /* Hide by default */
+    position: absolute;
+    background-color: #16213e;
+    color: #e1e1e6;
+    padding: 10px;
+    border-radius: 5px;
+    top: 30px; /* Adjust position */
+    left: 0;
+    z-index: 1;
+}
+
+.user-info:hover .email-tooltip {
+    display: block; /* Show on hover */
+}
+
+.email-tooltip a {
+    color: #e94560; /* Color for logout link */
+    text-decoration: none;
+}

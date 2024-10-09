@@ -96,11 +96,6 @@ app.get("/logout", (req, res) => {
 });
 
 // Weather app page (protected)
-app.get('/index', ensureAuthenticated, (req, res) => {
-  res.render('index');
-});
-
-// Weather app form submission (protected)
 app.post('/index', ensureAuthenticated, async (req, res) => {
   const city = req.body.city;
   const apiKey = process.env.OPENWEATHER_API_KEY;
@@ -145,12 +140,14 @@ app.post('/index', ensureAuthenticated, async (req, res) => {
 
     console.log(`Forecast Data: ${JSON.stringify(selectedForecast)}`);
 
-    res.render('index', { city, willRain, temperature, clouds, lat, lon, humidity, choose: chosenDay });
+    // Corrected line
+    res.render('index', { city, willRain, temperature, clouds, lat, lon, humidity, choose: chosenDay, user: req.user });
   } catch (error) {
     console.error(error);
     res.render('error', { message: error.message });
   }
 });
+
 
 // Google authentication route
 app.get(

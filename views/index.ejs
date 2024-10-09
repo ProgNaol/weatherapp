@@ -39,6 +39,18 @@
             </div>
         <% } %>
 
+        <!-- User Profile Section -->
+        <div class="user-profile">
+            <img src="path/to/profile-pic.jpg" alt="Profile Picture" class="profile-pic">
+            <div class="user-info">
+                <p class="username">Hover to see email</p>
+                <div class="email-tooltip">
+                    <p><%= req.user.email %></p>
+                    <a href="/logout">Logout</a>
+                </div>
+            </div>
+        </div>
+
         <footer class="copyright">
             CopyRight© Naol 2024. All rights reserved.
         </footer>
