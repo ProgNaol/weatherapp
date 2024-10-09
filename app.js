@@ -16,18 +16,17 @@ const saltRounds = 10;
 env.config();
 
 // MongoDB connection
-const mongoURI = process.env.MONGODB_URI;
-
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+mongoose.connect(process.env.MONGODB_URI, { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true 
 })
 .then(() => {
-  console.log("MongoDB connected successfully!");
+  console.log('MongoDB connected successfully!');
 })
 .catch(err => {
-  console.error("MongoDB connection error:", err);
+  console.error('MongoDB connection error:', err);
 });
+
 
 // Session setup with MongoDB store
 app.use(
