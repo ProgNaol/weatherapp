@@ -40,16 +40,22 @@
         <% } %>
 
         <!-- User Profile Section -->
-        <div class="user-profile">
-            <img src="path/to/download.png" alt="Profile Picture" class="profile-pic">
-            <div class="user-info">
-                <p class="username">Hover to see email</p>
-                <div class="email-tooltip">
-                    <p><%= req.user.email %></p>
-                    <a href="/logout">Logout</a>
+        <% if (typeof user !== 'undefined' && user) { %>
+            <div class="user-profile">
+                <img src="/views/path/to/download.png" alt="Profile Picture" class="profile-pic">
+                <div class="user-info">
+                    <p class="username">Hover to see email</p>
+                    <div class="email-tooltip">
+                        <p><%= user.email %></p>
+                        <a href="/logout">Logout</a>
+                    </div>
                 </div>
             </div>
-        </div>
+        <% } else { %>
+            <div class="login-prompt">
+                <p>Please <a href="/login">login</a> to see your profile.</p>
+            </div>
+        <% } %>
 
         <footer class="copyright">
             CopyRight© Naol 2024. All rights reserved.

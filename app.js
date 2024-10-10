@@ -16,7 +16,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 const saltRounds = 10;
 
-
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
 
@@ -66,27 +65,25 @@ app.use((req, res, next) => {
 
 // Middleware to check if the user is authenticated
 function ensureAuthenticated(req, res, next) {
-    console.log('ensureAuthenticated - isAuthenticated:', req.isAuthenticated());
     if (req.isAuthenticated()) {
         return next();
     }
-    console.log('User not authenticated, redirecting to /login');
     res.redirect('/login');
 }
 
 // Render home page (accessible to all)
 app.get("/", (req, res) => {
-    res.render("home.ejs");
+    res.render("home.ejs", { user: req.user });
 });
 
 // Render login page
 app.get("/login", (req, res) => {
-    res.render("login.ejs");
+    res.render("login.ejs", { user: req.user });
 });
 
 // Render register page
 app.get("/register", (req, res) => {
-    res.render("register.ejs");
+    res.render("register.ejs", { user: req.user });
 });
 
 // Logout route
@@ -94,15 +91,15 @@ app.get("/logout", (req, res) => {
     req.logout(function (err) {
         if (err) {
             console.error('Logout error:', err);
-            return res.status(500).render('error', { message: 'An error occurred during logout. Please try again.' });
+            return res.status(500).render('error', { message: 'An error occurred during logout. Please try again.', user: req.user });
         }
         res.redirect("/");
     });
 });
 
 // Weather app page (protected)
-app.get("/index", (req, res) => {
-  res.render("index.ejs");
+app.get("/index", ensureAuthenticated, (req, res) => {
+    res.render("index.ejs", { user: req.user });
 });
 
 app.post('/index', ensureAuthenticated, async (req, res) => {
@@ -140,7 +137,7 @@ app.post('/index', ensureAuthenticated, async (req, res) => {
         res.render('index', { city, willRain, temperature, clouds, lat, lon, humidity, choose: chosenDay, user: req.user });
     } catch (error) {
         console.error('Error processing weather data:', error);
-        res.status(500).render('error', { message: 'An error occurred while fetching weather data. Please try again.' });
+        res.status(500).render('error', { message: 'An error occurred while fetching weather data. Please try again.', user: req.user });
     }
 });
 
@@ -179,7 +176,7 @@ app.post("/register", async (req, res) => {
         res.redirect("/login");
     } catch (err) {
         console.error('Registration error:', err);
-        res.status(500).render('error', { message: 'An error occurred during registration. Please try again.' });
+        res.status(500).render('error', { message: 'An error occurred during registration. Please try again.', user: req.user });
     }
 });
 
@@ -243,7 +240,7 @@ passport.deserializeUser(async (id, done) => {
 // Add error handling middleware
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
-    res.status(500).render('error', { message: 'An unexpected error occurred. Please try again later.' });
+    res.status(500).render('error', { message: 'An unexpected error occurred. Please try again later.', user: req.user });
 });
 
 app.listen(port, () => {
