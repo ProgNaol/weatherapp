@@ -96,6 +96,11 @@ app.get("/logout", (req, res) => {
 });
 
 // Weather app page (protected)
+app.get("/index", ensureAuthenticated, (req, res) => {
+  res.render("index", { user: req.user, city: null, willRain: null, temperature: null, clouds: null, lat: null, lon: null, humidity: null, choose: null });
+});
+
+// Modify the existing POST route for /index
 app.post('/index', ensureAuthenticated, async (req, res) => {
   const city = req.body.city;
   const apiKey = process.env.OPENWEATHER_API_KEY;
@@ -140,7 +145,6 @@ app.post('/index', ensureAuthenticated, async (req, res) => {
 
     console.log(`Forecast Data: ${JSON.stringify(selectedForecast)}`);
 
-    // Corrected line
     res.render('index', { city, willRain, temperature, clouds, lat, lon, humidity, choose: chosenDay, user: req.user });
   } catch (error) {
     console.error(error);
