@@ -21,7 +21,13 @@
             height: 80px;
             border-radius: 50%;
             margin-right: 15px;
-            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--accent-color);
+            color: var(--text-color);
+            font-size: 2rem;
+            font-weight: bold;
         }
         .user-info {
             text-align: left;
@@ -53,7 +59,9 @@
         <!-- User Profile Section -->
         <% if (typeof user !== 'undefined' && user) { %>
             <div class="user-profile">
-                <img src="/download.png" alt="Profile Picture" class="profile-pic">
+                <div class="profile-pic">
+                    <%= user.email.charAt(0).toUpperCase() %>
+                </div>
                 <div class="user-info">
                     <p class="username"><%= user.email.split('@')[0] %></p>
                     <p class="email"><%= user.email %></p>
