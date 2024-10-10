@@ -9,7 +9,6 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
 import MongoStore from 'connect-mongo';
 import dotenv from "dotenv";
-import EmailVerifier from 'email-verifier';
 
 dotenv.config();
 
@@ -17,7 +16,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 const saltRounds = 10;
 
-const verifier = new EmailVerifier(process.env.EMAIL_VERIFIER_API_KEY);
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
@@ -103,24 +101,8 @@ app.get("/logout", (req, res) => {
 });
 
 // Weather app page (protected)
-app.get("/index", ensureAuthenticated, (req, res) => {
-    try {
-        console.log('Rendering index page for user:', req.user);
-        res.render("index", { 
-            user: req.user, 
-            city: null, 
-            willRain: null, 
-            temperature: null, 
-            clouds: null, 
-            lat: null, 
-            lon: null, 
-            humidity: null, 
-            choose: null 
-        });
-    } catch (error) {
-        console.error('Error rendering index page:', error);
-        res.status(500).render('error', { message: 'An error occurred while loading the page. Please try again.' });
-    }
+app.get("/index", (req, res) => {
+  res.render("index.ejs");
 });
 
 app.post('/index', ensureAuthenticated, async (req, res) => {
