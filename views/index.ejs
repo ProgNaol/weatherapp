@@ -5,10 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Will It Rain?</title>
     <link rel="stylesheet" href="/styles.css">
+    <style>
+        .user-profile {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            max-width: 400px;
+        }
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        .user-info {
+            text-align: left;
+        }
+        .username {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        .email {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+        .logout-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: var(--highlight-color);
+            text-decoration: none;
+        }
+        .logout-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Check if it will rain</h1>
+
+        <!-- User Profile Section -->
+        <% if (typeof user !== 'undefined' && user) { %>
+            <div class="user-profile">
+                <img src="/download.png" alt="Profile Picture" class="profile-pic">
+                <div class="user-info">
+                    <p class="username"><%= user.email.split('@')[0] %></p>
+                    <p class="email"><%= user.email %></p>
+                    <a href="/logout" class="logout-link">Logout</a>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="login-prompt">
+                <p>Please <a href="/login">login</a> to see your profile.</p>
+            </div>
+        <% } %>
 
         <form action="/index" method="POST">
             <input type="text" name="city" placeholder="Enter your city" required>
@@ -36,24 +92,6 @@
                 <p class="addinfo">Latitude: <%= lat %></p>
                 <p class="addinfo">Longitude: <%= lon %></p>
                 <p class="addinfo">Humidity: <%= humidity %></p>
-            </div>
-        <% } %>
-
-        <!-- User Profile Section -->
-        <% if (typeof user !== 'undefined' && user) { %>
-            <div class="user-profile">
-                <img src="./download.png" alt="Profile Picture" class="profile-pic">
-                <div class="user-info">
-                    <p class="username">Hover to see email</p>
-                    <div class="email-tooltip">
-                        <p><%= user.email %></p>
-                        <a href="/logout">Logout</a>
-                    </div>
-                </div>
-            </div>
-        <% } else { %>
-            <div class="login-prompt">
-                <p>Please <a href="/login">login</a> to see your profile.</p>
             </div>
         <% } %>
 
