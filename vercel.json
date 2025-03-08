@@ -18,5 +18,9 @@
   ],
   "env": {
     "NODE_ENV": "production"
-  }
+  },
+  "includeFiles": [
+    "views/**",
+    "public/**"
+  ]
 }
