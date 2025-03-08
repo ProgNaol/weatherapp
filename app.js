@@ -9,6 +9,8 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
 import MongoStore from 'connect-mongo';
 import dotenv from "dotenv";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Load environment variables
 dotenv.config();
@@ -105,9 +107,18 @@ app.use(express.static("public"));
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Get directory name in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Setup views with absolute path for Vercel deployment
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
+
+// Log the views directory path for debugging
+console.log('Views directory path:', path.join(__dirname, 'views'));
 
 // Add logging middleware
 app.use((req, res, next) => {
