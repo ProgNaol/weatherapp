@@ -10,8 +10,10 @@ import session from "express-session";
 import MongoStore from 'connect-mongo';
 import dotenv from "dotenv";
 
+// Load environment variables
 dotenv.config();
 
+// Initialize Express app
 const app = express();
 const port = process.env.PORT || 3000;
 const saltRounds = 10;
@@ -19,16 +21,34 @@ const saltRounds = 10;
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
 
-// Connect to MongoDB
-mongoose.connect(mongoURI, { 
-    useNewUrlParser: true, 
-    useUnifiedTopology: true 
-})
-.then(() => {
-    console.log('MongoDB connected successfully!');
-})
-.catch(err => {
+// Connect to MongoDB with improved error handling for serverless environments
+let mongooseConnection = null;
+
+const connectToMongoDB = async () => {
+  if (mongooseConnection) {
+    return mongooseConnection;
+  }
+  
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      await mongoose.connect(mongoURI, { 
+        useNewUrlParser: true, 
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 5000
+      });
+      console.log('MongoDB connected successfully!');
+    }
+    mongooseConnection = mongoose.connection;
+    return mongooseConnection;
+  } catch (err) {
     console.error('MongoDB connection error:', err);
+    throw err;
+  }
+};
+
+// Initialize DB connection
+connectToMongoDB().catch(err => {
+  console.error('Failed to connect to MongoDB on startup:', err);
 });
 
 // Define User Schema
@@ -40,12 +60,22 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', UserSchema);
 
-// Set up session store
+// Set up session store with better error handling
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'fallback_secret_never_use_in_production',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: mongoURI })
+    store: MongoStore.create({ 
+      mongoUrl: mongoURI,
+      touchAfter: 24 * 3600, // time period in seconds
+      autoRemove: 'native',
+      crypto: {
+        secret: process.env.SESSION_SECRET || 'fallback_secret_never_use_in_production'
+      }
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 // 1 day
+    }
 }));
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -180,21 +210,29 @@ app.post("/register", async (req, res) => {
     }
 });
 
-// Local login strategy
+// Local login strategy with improved error handling
 passport.use(new LocalStrategy(
     { usernameField: 'username' },
     async function (username, password, done) {
         try {
+            await connectToMongoDB();
             const user = await User.findOne({ email: username });
             if (!user) {
                 return done(null, false, { message: 'Incorrect username.' });
             }
+            
+            // Handle case where user was created with Google and has no password
+            if (!user.password) {
+                return done(null, false, { message: 'Please login with Google.' });
+            }
+            
             const isValid = await bcrypt.compare(password, user.password);
             if (!isValid) {
                 return done(null, false, { message: 'Incorrect password.' });
             }
             return done(null, user);
         } catch (err) {
+            console.error('Local auth error:', err);
             return done(err);
         }
     }
@@ -204,11 +242,12 @@ passport.use(new LocalStrategy(
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://weatherapp-sjep.onrender.com/auth/google/secrets",
+    callbackURL: "/auth/google/secrets",
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
 },
 async function(accessToken, refreshToken, profile, done) {
     try {
+        await connectToMongoDB();
         const existingUser = await User.findOne({ googleId: profile.id });
         if (existingUser) {
             return done(null, existingUser);
@@ -220,6 +259,7 @@ async function(accessToken, refreshToken, profile, done) {
         await newUser.save();
         done(null, newUser);
     } catch (err) {
+        console.error('Google auth error:', err);
         done(err, null);
     }
 }));
@@ -230,9 +270,11 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
     try {
+        await connectToMongoDB();
         const user = await User.findById(id);
         done(null, user);
     } catch (err) {
+        console.error('Error deserializing user:', err);
         done(err, null);
     }
 });
@@ -243,6 +285,12 @@ app.use((err, req, res, next) => {
     res.status(500).render('error', { message: 'An unexpected error occurred. Please try again later.', user: req.user });
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+// For local development only
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    });
+}
+
+// Export the Express API for Vercel
+export default app;
