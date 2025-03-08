@@ -18,6 +18,17 @@ const app = express();
 const port = process.env.PORT || 3000;
 const saltRounds = 10;
 
+// Log all environment variables for debugging (excluding sensitive values)
+console.log('Environment check:', {
+  NODE_ENV: process.env.NODE_ENV,
+  PORT: process.env.PORT,
+  MONGODB_URI: process.env.MONGODB_URI ? 'Set' : 'Not set',
+  SESSION_SECRET: process.env.SESSION_SECRET ? 'Set' : 'Not set',
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set',
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set',
+  OPENWEATHER_API_KEY: process.env.OPENWEATHER_API_KEY ? 'Set' : 'Not set'
+});
+
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
 
@@ -29,19 +40,30 @@ const connectToMongoDB = async () => {
     return mongooseConnection;
   }
   
+  if (!mongoURI) {
+    console.error('MONGODB_URI environment variable is not set!');
+    throw new Error('MONGODB_URI is not configured');
+  }
+  
   try {
     if (mongoose.connection.readyState !== 1) {
+      console.log('Connecting to MongoDB...');
       await mongoose.connect(mongoURI, { 
         useNewUrlParser: true, 
         useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 5000
+        serverSelectionTimeoutMS: 10000,
+        family: 4  // Force IPv4
       });
       console.log('MongoDB connected successfully!');
     }
     mongooseConnection = mongoose.connection;
     return mongooseConnection;
   } catch (err) {
-    console.error('MongoDB connection error:', err);
+    console.error('MongoDB connection error details:', {
+      message: err.message,
+      code: err.code,
+      name: err.name
+    });
     throw err;
   }
 };
@@ -279,10 +301,32 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
-// Add error handling middleware
+// Add detailed error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Unhandled error:', err);
-    res.status(500).render('error', { message: 'An unexpected error occurred. Please try again later.', user: req.user });
+    console.error('Unhandled error:', {
+        message: err.message,
+        stack: err.stack,
+        code: err.code,
+        path: req.path,
+        method: req.method
+    });
+    
+    // Check if error.ejs exists, if not provide a simple error response
+    try {
+        res.status(500).render('error', { 
+            message: 'An unexpected error occurred. Please try again later.', 
+            error: process.env.NODE_ENV === 'development' ? err : {},
+            user: req.user 
+        });
+    } catch (renderErr) {
+        console.error('Error rendering error page:', renderErr);
+        res.status(500).send('Internal Server Error. Please try again later.');
+    }
+});
+
+// Default error view in case there's no error template
+app.use((req, res) => {
+    res.status(404).send('Page not found. Please check the URL and try again.');
 });
 
 // For local development only
@@ -291,6 +335,16 @@ if (process.env.NODE_ENV !== 'production') {
         console.log(`Server is running on port ${port}`);
     });
 }
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+});
 
 // Export the Express API for Vercel
 export default app;

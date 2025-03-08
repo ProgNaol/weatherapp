@@ -3,14 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title>Error - Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #e74c3c;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .error-message {
+            background-color: #fff8f8;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .debug-info {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            display: none;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .toggle-debug {
+            background-color: #95a5a6;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Error</h1>
-        <p><%= message %></p>
-        <a href="/">Go back</a>
+        <h1>Something went wrong</h1>
+        
+        <div class="error-message">
+            <p><%= message %></p>
+        </div>
+        
+        <% if (typeof error !== 'undefined' && Object.keys(error).length > 0) { %>
+        <button class="btn toggle-debug" onclick="document.getElementById('debug-info').style.display = document.getElementById('debug-info').style.display === 'none' ? 'block' : 'none';">Show/Hide Technical Details</button>
+        
+        <div id="debug-info" class="debug-info">
+            <% if (error.stack) { %>
+            <p><strong>Stack:</strong> <%= error.stack %></p>
+            <% } %>
+            
+            <% if (error.code) { %>
+            <p><strong>Error Code:</strong> <%= error.code %></p>
+            <% } %>
+        </div>
+        <% } %>
+        
+        <div>
+            <a href="/" class="btn">Go to Home Page</a>
+            <a href="/login" class="btn">Go to Login</a>
+        </div>
     </div>
+    
+    <script>
+        console.log('Error page loaded');
+        // This script helps diagnose environment issues
+        window.onerror = function(msg, url, line) {
+            console.error(`Error: ${msg} at ${url}:${line}`);
+            return true;
+        };
+    </script>
 </body>
 </html>
